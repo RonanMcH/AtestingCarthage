@@ -1,0 +1,82 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.3 (swiftlang-1200.0.16.9 clang-1200.0.22.5)
+// swift-module-flags: -target arm64-apple-ios11.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name NetworkClient
+import Foundation
+@_exported import NetworkClient
+import Swift
+public enum HTTPHeader : Swift.Hashable {
+  case userAgent(Swift.String)
+  case contentLength(Swift.String)
+  case contentType(Swift.String)
+  case accept(Swift.String)
+  case acceptEncoding(Swift.String)
+  case other(field: Swift.String, value: Swift.String)
+  public var hashValue: Swift.Int {
+    get
+  }
+  public func hash(into hasher: inout Swift.Hasher)
+  public static func == (a: NetworkClient.HTTPHeader, b: NetworkClient.HTTPHeader) -> Swift.Bool
+}
+public enum NetworkError : Swift.Error {
+  case noResponse
+  case failedToDecode(data: Foundation.Data?, response: Foundation.HTTPURLResponse)
+  case unsuccessfulStatusCodeForRequest(statusCode: Swift.Int, data: Foundation.Data?, response: Foundation.HTTPURLResponse)
+  case networkRequestFailed(error: Swift.Error)
+}
+extension NetworkError : Swift.Equatable {
+  public static func == (lhs: NetworkClient.NetworkError, rhs: NetworkClient.NetworkError) -> Swift.Bool
+}
+public protocol NetworkClient {
+  var baseUrl: Foundation.URL { get }
+  var defaultHeaders: [NetworkClient.HTTPHeader] { get }
+  var urlSession: Foundation.URLSession { get }
+  @discardableResult
+  func performRequest<D, E>(withBody body: E, method: NetworkClient.HTTPMethodWithBody, responseType: D.Type, path: Swift.String, query: [Swift.String : Swift.String]?, headers: [NetworkClient.HTTPHeader]?, completionHandler: @escaping (Swift.Result<NetworkClient.NetworkClientResponse<D>, NetworkClient.NetworkError>) -> Swift.Void) -> Foundation.URLSessionDataTask where D : Swift.Decodable, E : Swift.Encodable
+  @discardableResult
+  func performRequest<D>(method: NetworkClient.HTTPMethodWithoutBody, responseType: D.Type, path: Swift.String, query: [Swift.String : Swift.String]?, headers: [NetworkClient.HTTPHeader]?, completionHandler: @escaping (Swift.Result<NetworkClient.NetworkClientResponse<D>, NetworkClient.NetworkError>) -> Swift.Void) -> Foundation.URLSessionDataTask where D : Swift.Decodable
+}
+public struct NetworkClientBuilder {
+  public init(urlSessionConfiguration: Foundation.URLSessionConfiguration = URLSessionConfiguration.default, defaultHeaders: [NetworkClient.HTTPHeader], baseUrl: Swift.String)
+  public func build() throws -> NetworkClient.NetworkClient
+}
+public enum NetworkClientError : Swift.Error {
+  case invalidBaseURL
+  public static func == (a: NetworkClient.NetworkClientError, b: NetworkClient.NetworkClientError) -> Swift.Bool
+  public var hashValue: Swift.Int {
+    get
+  }
+  public func hash(into hasher: inout Swift.Hasher)
+}
+public enum HTTPMethodWithBody : Swift.String {
+  case POST
+  case PUT
+  case DELETE
+  public typealias RawValue = Swift.String
+  public init?(rawValue: Swift.String)
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum HTTPMethodWithoutBody : Swift.String {
+  case GET
+  case HEAD
+  case OPTIONS
+  public typealias RawValue = Swift.String
+  public init?(rawValue: Swift.String)
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct NetworkClientResponse<D> where D : Swift.Decodable {
+  public let response: Foundation.HTTPURLResponse
+  public let responseObject: D?
+  public init(response: Foundation.HTTPURLResponse, responseObject: D?)
+}
+extension NetworkClient.NetworkClientError : Swift.Equatable {}
+extension NetworkClient.NetworkClientError : Swift.Hashable {}
+extension NetworkClient.HTTPMethodWithBody : Swift.Equatable {}
+extension NetworkClient.HTTPMethodWithBody : Swift.Hashable {}
+extension NetworkClient.HTTPMethodWithBody : Swift.RawRepresentable {}
+extension NetworkClient.HTTPMethodWithoutBody : Swift.Equatable {}
+extension NetworkClient.HTTPMethodWithoutBody : Swift.Hashable {}
+extension NetworkClient.HTTPMethodWithoutBody : Swift.RawRepresentable {}
